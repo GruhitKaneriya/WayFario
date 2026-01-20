@@ -47,28 +47,131 @@
 
         /* Status Text Animation */
         #status-text { animation: fadeInUp 0.5s infinite alternate; }
+
+        /* Animated gradient background */
+        .animated-gradient {
+            background: linear-gradient(-45deg, #1e293b, #334155, #1e40af, #1e3a8a);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Floating particles */
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+            50% { transform: translateY(-100px) translateX(50px); opacity: 0.6; }
+        }
+
+        /* Shimmer effect */
+        .shimmer {
+            position: relative;
+            overflow: hidden;
+        }
+        .shimmer::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 30%,
+                rgba(255, 255, 255, 0.1) 50%,
+                transparent 70%
+            );
+            animation: shimmer 3s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%); }
+            100% { transform: translateX(100%) translateY(100%); }
+        }
+
+        /* Ripple effect on cards */
+        .ripple-container {
+            position: relative;
+            overflow: hidden;
+        }
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.3);
+            transform: scale(0);
+            animation: ripple-animation 0.6s ease-out;
+        }
+        @keyframes ripple-animation {
+            to { transform: scale(4); opacity: 0; }
+        }
+
+        /* Input focus glow */
+        input:focus {
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2), 0 0 20px rgba(37, 99, 235, 0.3);
+        }
+
+        /* Hover lift effect */
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Pulse border animation */
+        @keyframes pulse-border {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+        }
+
+        /* Loading dots */
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
     </style>
 </head>
 <body class="pb-20">
 
-    <div class="bg-slate-900 py-24 px-4 text-center text-white relative overflow-hidden">
+    <div class="bg-slate-900 animated-gradient py-24 px-4 text-center text-white relative overflow-hidden">
         <div class="absolute inset-0 opacity-20">
             <svg width="100%" height="100%"><rect width="100%" height="100%" fill="url(#grid)" /><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="1"/></pattern></defs></svg>
         </div>
+        <!-- Floating particles -->
+        <div class="particle" style="width: 4px; height: 4px; top: 20%; left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="width: 6px; height: 6px; top: 60%; left: 80%; animation-delay: 2s;"></div>
+        <div class="particle" style="width: 3px; height: 3px; top: 40%; left: 60%; animation-delay: 4s;"></div>
+        <div class="particle" style="width: 5px; height: 5px; top: 80%; left: 30%; animation-delay: 6s;"></div>
+        <div class="particle" style="width: 4px; height: 4px; top: 30%; left: 90%; animation-delay: 8s;"></div>
+        
         <div class="relative z-10 animate__animated animate__fadeInDown">
-            <h1 class="text-5xl md:text-6xl font-black mb-3 tracking-tighter">WayFario</h1>
+            <h1 class="text-5xl md:text-6xl font-black mb-3 tracking-tighter shimmer pb-2">WayFario</h1>
             <p class="text-slate-300 text-lg md:text-xl max-w-xl mx-auto font-light">Your intelligent travel companion.</p>
         </div>
     </div>
 
     <div class="max-w-4xl mx-auto px-4 -mt-16 relative z-20">
-        <div class="glass-effect rounded-[3rem] p-10 shadow-2xl animate__animated animate__zoomIn">
+        <div class="glass-effect rounded-[3rem] p-10 shadow-2xl animate__animated animate__zoomIn hover-lift">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <input id="source" type="text" placeholder="Origin City" class="p-4 md:p-5 text-base md:text-lg rounded-2xl bg-slate-100/50 border-none focus:ring-2 focus:ring-blue-500 transition-all outline-none font-semibold">
                 <input id="destination" type="text" placeholder="Destination" class="p-4 md:p-5 text-base md:text-lg rounded-2xl bg-slate-100/50 border-none focus:ring-2 focus:ring-blue-500 transition-all outline-none font-semibold">
                 <input id="days" type="number" value="3" class="p-4 md:p-5 text-base md:text-lg rounded-2xl bg-slate-100/50 border-none focus:ring-2 focus:ring-blue-500 transition-all outline-none font-semibold">
             </div>
-            <button onclick="generateTrip()" id="btn" class="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-500/30 transition-all active:scale-[0.97] text-lg md:text-xl animate__animated animate__pulse animate__infinite">
+            <button onclick="generateTrip()" id="btn" class="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-500/30 transition-all active:scale-[0.97] text-lg md:text-xl ripple-container">
                 <span id="btn-text">PLAN MY ADVENTURE</span>
             </button>
         </div>
@@ -76,7 +179,7 @@
         <div id="loading-screen" class="hidden mt-20 flex flex-col items-center justify-center space-y-8 animate__animated animate__fadeIn">
             <div class="globe-spinner"></div>
             <div class="text-center">
-                <p id="status-text" class="text-2xl font-bold text-slate-800 tracking-tight">Consulting AI Travel Expert...</p>
+                <p id="status-text" class="text-2xl font-bold text-slate-800 tracking-tight loading-dots">Consulting AI Travel Expert</p>
                 <p class="text-slate-500 mt-2">This usually takes about a minute to generate.</p>
             </div>
         </div>
@@ -117,6 +220,25 @@
             "Finalizing your dream itinerary..."
         ];
 
+        // Ripple effect on button click
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.ripple-container')) {
+                const btn = e.target.closest('.ripple-container');
+                const rect = btn.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const ripple = document.createElement('span');
+                ripple.className = 'ripple';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.style.width = ripple.style.height = '10px';
+                
+                btn.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            }
+        });
+
         async function generateTrip() {
             const source = document.getElementById('source').value;
             const dest = document.getElementById('destination').value;
@@ -154,7 +276,7 @@
 
                 data.itinerary.forEach((day, index) => {
                     const dayHtml = `
-                        <div class="animate__animated animate__fadeInUp" style="animation-delay: ${index * 0.15}s">
+                        <div class="animate__animated animate__fadeInUp hover-lift" style="animation-delay: ${index * 0.15}s">
                             <div class="bg-white p-8 rounded-[2.75rem] shadow-xl border border-slate-100">
                                 <div class="flex items-center gap-4 mb-6">
                                     <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 font-black text-xl flex items-center justify-center animate__animated animate__pulse animate__infinite">D${day.day}</div>
@@ -170,7 +292,7 @@
                                                 <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-sm group-hover:scale-105 transition-transform duration-300">${actIdx + 1}</div>
                                                 <div class="flex-1 w-px bg-blue-100 group-last:hidden"></div>
                                             </div>
-                                            <div class="flex-1 bg-slate-50 border border-slate-200 rounded-2xl p-4 hover:shadow-lg transition-all duration-300">
+                                            <div class="flex-1 bg-slate-50 border border-slate-200 rounded-2xl p-4 hover:shadow-lg hover:border-blue-200 transition-all duration-300 cursor-pointer">
                                                 <div class="flex items-center justify-between mb-2">
                                                     <span class="text-[11px] font-bold text-blue-500 uppercase tracking-[0.2em]">${act.time_of_day}</span>
                                                     <span class="text-emerald-600 font-black text-sm">${act.estimated_cost}</span>
