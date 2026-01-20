@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoyageAI | Premium Trip Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f0f4f8; scroll-behavior: smooth; }
+        
+        /* Advanced Pulsing Globe Animation */
+        .globe-spinner {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #2563eb;
+            position: relative;
+            box-shadow: 0 0 30px rgba(37, 99, 235, 0.4);
+            animation: pulse 2s infinite;
+        }
+        .globe-spinner::after {
+            content: "✈️";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            animation: flight 3s linear infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+        @keyframes flight {
+            0% { transform: translate(-50%, -50%) rotate(0deg) translateX(40px) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg) translateX(40px) rotate(-360deg); }
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        /* Status Text Animation */
+        #status-text { animation: fadeInUp 0.5s infinite alternate; }
+    </style>
+</head>
+<body class="pb-20">
+
+    <div class="bg-slate-900 py-24 px-4 text-center text-white relative overflow-hidden">
+        <div class="absolute inset-0 opacity-20">
+            <svg width="100%" height="100%"><rect width="100%" height="100%" fill="url(#grid)" /><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="1"/></pattern></defs></svg>
+        </div>
+        <div class="relative z-10 animate__animated animate__fadeInDown">
+            <h1 class="text-5xl md:text-6xl font-black mb-3 tracking-tighter">WayFario</h1>
+            <p class="text-slate-300 text-lg md:text-xl max-w-xl mx-auto font-light">Your intelligent travel companion.</p>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 -mt-16 relative z-20">
+        <div class="glass-effect rounded-[3rem] p-10 shadow-2xl animate__animated animate__zoomIn">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <input id="source" type="text" placeholder="Origin City" class="p-4 md:p-5 text-base md:text-lg rounded-2xl bg-slate-100/50 border-none focus:ring-2 focus:ring-blue-500 transition-all outline-none font-semibold">
+                <input id="destination" type="text" placeholder="Destination" class="p-4 md:p-5 text-base md:text-lg rounded-2xl bg-slate-100/50 border-none focus:ring-2 focus:ring-blue-500 transition-all outline-none font-semibold">
+                <input id="days" type="number" value="3" class="p-4 md:p-5 text-base md:text-lg rounded-2xl bg-slate-100/50 border-none focus:ring-2 focus:ring-blue-500 transition-all outline-none font-semibold">
+            </div>
+            <button onclick="generateTrip()" id="btn" class="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-500/30 transition-all active:scale-[0.97] text-lg md:text-xl animate__animated animate__pulse animate__infinite">
+                <span id="btn-text">PLAN MY ADVENTURE</span>
+            </button>
+        </div>
+
+        <div id="loading-screen" class="hidden mt-20 flex flex-col items-center justify-center space-y-8 animate__animated animate__fadeIn">
+            <div class="globe-spinner"></div>
+            <div class="text-center">
+                <p id="status-text" class="text-2xl font-bold text-slate-800 tracking-tight">Consulting AI Travel Expert...</p>
+                <p class="text-slate-500 mt-2">This usually takes about a minute to generate.</p>
+            </div>
+        </div>
+
+        <div id="results" class="hidden mt-16 space-y-12 animate__animated animate__fadeInUp">
+            <div class="relative rounded-[3.5rem] overflow-hidden shadow-2xl group bg-gradient-to-r from-slate-900 via-slate-800 to-blue-800 p-10 md:p-14 animate__animated animate__fadeIn">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                    <div>
+                        <p class="text-blue-200 text-sm uppercase tracking-[0.3em] font-bold">Destination</p>
+                        <h2 id="res-dest" class="text-4xl md:text-5xl font-black text-white tracking-tight mb-3"></h2>
+                        <p class="text-slate-200 text-base md:text-lg max-w-2xl">Curated by WayFario with smarter pacing, local flavor, and budget-savvy picks.</p>
+                    </div>
+                    <span id="res-budget" class="bg-yellow-400 text-slate-900 px-6 py-3 rounded-2xl text-lg font-black shadow-xl uppercase tracking-widest self-start md:self-center">--</span>
+                </div>
+            </div>
+
+            <div id="itinerary-list" class="space-y-12"></div>
+
+            <div class="bg-blue-600 rounded-[3.5rem] p-12 text-white shadow-2xl relative overflow-hidden group">
+                <div class="relative z-10">
+                    <h3 class="text-3xl font-black mb-6 flex items-center gap-3">
+                        <span>💡</span> Travel Intelligence
+                    </h3>
+                    <p id="res-tips" class="text-blue-50 leading-relaxed text-xl font-medium italic opacity-95"></p>
+                </div>
+                <div class="absolute -right-12 -bottom-12 opacity-10 text-[15rem] font-black group-hover:rotate-12 transition-transform duration-700">AI</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const statusMessages = [
+            "Analyzing flight paths...",
+            "Searching for local hidden gems...",
+            "Optimizing your daily schedule...",
+            "Calculating estimated costs...",
+            "Checking local weather patterns...",
+            "Finalizing your dream itinerary..."
+        ];
+
+        async function generateTrip() {
+            const source = document.getElementById('source').value;
+            const dest = document.getElementById('destination').value;
+            const days = document.getElementById('days').value;
+            const btn = document.getElementById('btn');
+            const results = document.getElementById('results');
+            const loader = document.getElementById('loading-screen');
+            const statusTag = document.getElementById('status-text');
+
+            if (!source || !dest) return alert("Destination is required!");
+
+            // Enter Loading State
+            btn.disabled = true;
+            results.classList.add('hidden');
+            loader.classList.remove('hidden');
+            
+            // Start Status Rotation
+            let msgIdx = 0;
+            const statusInterval = setInterval(() => {
+                statusTag.innerText = statusMessages[msgIdx % statusMessages.length];
+                msgIdx++;
+            }, 2000);
+
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/plan?source=${source}&destination=${dest}&days=${days}`);
+                const data = await response.json();
+
+                // Build UI (image removed for stability)
+                document.getElementById('res-dest').innerText = data.destination;
+                document.getElementById('res-budget').innerText = data.total_estimated_budget;
+                document.getElementById('res-tips').innerText = data.travel_tips;
+
+                const list = document.getElementById('itinerary-list');
+                list.innerHTML = '';
+
+                data.itinerary.forEach((day, index) => {
+                    const dayHtml = `
+                        <div class="animate__animated animate__fadeInUp" style="animation-delay: ${index * 0.15}s">
+                            <div class="bg-white p-8 rounded-[2.75rem] shadow-xl border border-slate-100">
+                                <div class="flex items-center gap-4 mb-6">
+                                    <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 font-black text-xl flex items-center justify-center animate__animated animate__pulse animate__infinite">D${day.day}</div>
+                                    <div>
+                                        <p class="text-xs font-black text-blue-500 uppercase tracking-[0.3em]">Itinerary</p>
+                                        <h4 class="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">Day ${day.day}</h4>
+                                    </div>
+                                </div>
+                                <div class="space-y-4">
+                                    ${day.activities.map((act, actIdx) => `
+                                        <div class="flex gap-4 items-start group">
+                                            <div class="flex flex-col items-center">
+                                                <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-sm group-hover:scale-105 transition-transform duration-300">${actIdx + 1}</div>
+                                                <div class="flex-1 w-px bg-blue-100 group-last:hidden"></div>
+                                            </div>
+                                            <div class="flex-1 bg-slate-50 border border-slate-200 rounded-2xl p-4 hover:shadow-lg transition-all duration-300">
+                                                <div class="flex items-center justify-between mb-2">
+                                                    <span class="text-[11px] font-bold text-blue-500 uppercase tracking-[0.2em]">${act.time_of_day}</span>
+                                                    <span class="text-emerald-600 font-black text-sm">${act.estimated_cost}</span>
+                                                </div>
+                                                <h5 class="text-lg md:text-xl font-bold text-slate-800 leading-tight">${act.activity}</h5>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    list.innerHTML += dayHtml;
+                });
+
+                clearInterval(statusInterval);
+                loader.classList.add('hidden');
+                results.classList.remove('hidden');
+                window.scrollTo({ top: results.offsetTop - 50, behavior: 'smooth' });
+
+            } catch (err) {
+                clearInterval(statusInterval);
+                alert("Agent is offline. Make sure the backend is running!");
+                loader.classList.add('hidden');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
